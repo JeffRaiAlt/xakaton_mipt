@@ -1,0 +1,60 @@
+{
+  "features": [
+    {
+      "name": "lead_Ширина",
+      "source": "lead_Ширина",
+      "group": "group_5",
+      "description": "Ширина, приведенная к числовому виду и заполненная медианой.",
+      "baseline": true,
+      "leakage_risk": "none"
+    },
+    {
+      "name": "lead_Линейная высота (см)",
+      "source": "lead_Линейная высота (см)",
+      "group": "group_5",
+      "description": "Линейная высота, приведенная к числу и заполненная медианой.",
+      "baseline": true,
+      "leakage_risk": "none"
+    },
+    {
+      "name": "lead_Линейная высота (см)__was_missing",
+      "source": "lead_Линейная высота (см)",
+      "group": "group_5",
+      "description": "Флаг пропуска по признаку линейной высоты.",
+      "baseline": true,
+      "leakage_risk": "none"
+    },
+    {
+      "name": "lead_Вид оплаты",
+      "source": "lead_Вид оплаты",
+      "group": "group_5",
+      "description": "Нормализованный вид оплаты.",
+      "baseline": true,
+      "leakage_risk": "none"
+    },
+    {
+      "name": "returned_ts",
+      "source": "returned_ts",
+      "group": "group_5",
+      "description": "Дата возврата; потенциальный post-event признак.",
+      "baseline": false,
+      "leakage_risk": "high"
+    },
+    {
+      "name": "returned_ts__is_present",
+      "source": "returned_ts",
+      "group": "group_5",
+      "description": "Флаг наличия даты возврата.",
+      "baseline": false,
+      "leakage_risk": "high"
+    },
+    {
+      "name": "lead_Служба доставки",
+      "source": "lead_Служба доставки",
+      "group": "group_5",
+      "description": "Служба доставки с объединением редких категорий в OTHER.",
+      "baseline": true,
+      "leakage_risk": "none"
+    }
+  ]
+}

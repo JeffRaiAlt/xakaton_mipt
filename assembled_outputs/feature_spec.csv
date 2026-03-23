@@ -1,0 +1,20 @@
+name,source,group,description,baseline,leakage_risk
+lead_LEADQUALIFYCATION,lead_LEADQUALIFYCATION,group_2,Автоматически добавленный признак lead_LEADQUALIFYCATION,True,none
+contact_Код ПВЗ,contact_Код ПВЗ,group_2,Автоматически добавленный признак contact_Код ПВЗ,True,none
+lead_Вес (грамм)*,lead_Вес (грамм)*,group_2,Автоматически добавленный признак lead_Вес (грамм)*,True,none
+lead_Объявленная ценность (руб),lead_Объявленная ценность (руб),group_2,Автоматически добавленный признак lead_Объявленная ценность (руб),True,none
+lead_будущие покупки,lead_будущие покупки,group_2,Автоматически добавленный признак lead_будущие покупки,True,none
+lead_Сумма наложенного платежа (руб),lead_Сумма наложенного платежа (руб),group_2,Автоматически добавленный признак lead_Сумма наложенного платежа (руб),True,none
+lead_ACTUAL-FORMAT,lead_ACTUAL-FORMAT,group_2,Автоматически добавленный признак lead_ACTUAL-FORMAT,True,none
+lead_responsible_user_id,lead_responsible_user_id,group_2,Автоматически добавленный признак lead_responsible_user_id,True,none
+lead_Тариф Доставки,lead_Тариф Доставки,group_2,Автоматически добавленный признак lead_Тариф Доставки,True,none
+lead_Линейная длина (см),lead_Линейная длина (см),group_2,Автоматически добавленный признак lead_Линейная длина (см),True,none
+lead_utm_content,lead_utm_content,group_2,Автоматически добавленный признак lead_utm_content,True,none
+lead_Дата создания сделки,lead_Дата создания сделки,group_2,Автоматически добавленный признак lead_Дата создания сделки,True,none
+contact_LTV,contact_LTV,group_2,Автоматически добавленный признак contact_LTV,True,none
+sale_date,sale_date,group_2,Автоматически добавленный признак sale_date,True,none
+lead_LTV,lead_LTV,group_2,Автоматически добавленный признак lead_LTV,True,none
+lead_FORMNAME,lead_FORMNAME,group_2,Автоматически добавленный признак lead_FORMNAME,True,none
+outcome_unknown,outcome_unknown,group_2,Автоматически добавленный признак outcome_unknown,True,none
+lead_loss_reason_id,lead_loss_reason_id,group_2,Автоматически добавленный признак lead_loss_reason_id,True,none
+lead_Дата получения денег на Р/С,lead_Дата получения денег на Р/С,group_2,Автоматически добавленный признак lead_Дата получения денег на Р/С,True,none

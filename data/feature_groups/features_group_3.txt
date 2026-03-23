@@ -1,0 +1,22 @@
+Группа признаков 3
+========================================
+
+1. lead_Условный отказ
+2. lead_Поиск товаров GoSklad
+3. lead_Метод доставки
+4. current_status_id
+5. lead_Оплачено клиентом
+6. lead_Высота
+7. days_handed_to_issued_pvz
+8. lead_Стоимость доставки
+9. lead_BANNER-SIZES
+10. lead_Длина
+11. lead_price
+12. buyout_flag
+13. contact_Город
+14. lead_pipeline_id
+15. lead_Дата возврата посылки на склад
+16. lead_ПВЗ СДЭК
+17. lead_type
+18. lead_utm_group
+19. lead_utm_referrer

@@ -1,0 +1,23 @@
+Группа признаков 1
+========================================
+
+1. handed_to_delivery_ts
+2. lead_Счет оплачен
+3. lead_utm_campaign
+4. contact_Источник трафика
+5. lead_Статус заказа на сайте
+6. lead_Дата перехода в Сборку
+7. lead_utm_term
+8. lead_utm_sky
+9. lead_HEIGHT
+10. rejected_ts
+11. lead_group
+12. lifecycle_incomplete
+13. lead_Дата перехода Передан в доставку
+14. lead_Проблема
+15. lead_Квалификация лида
+16. lead_Источник
+17. issued_or_pvz_ts
+18. lead_utm_source
+19. lead_created_at
+20. contact_responsible_user_id

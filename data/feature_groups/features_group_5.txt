@@ -1,0 +1,22 @@
+Группа признаков 5
+========================================
+
+1. lead_Ширина
+2. lead_Линейная высота (см)
+3. lead_Вид оплаты
+4. returned_ts
+5. lead_Служба доставки
+6. lead_Компания Отправитель
+7. lead_Ответственный за доставку
+8. lead_is_deleted
+9. lead_WIDTH
+10. lead_Почтовый индекс
+11. lead_group_id
+12. lead_Масса (гр)
+13. lead_closed_at
+14. contact_created_at
+15. lead_utm_medium
+16. lead_Категория и варианты выбора
+17. received_ts
+18. lead_Модель телефона
+19. lead_id

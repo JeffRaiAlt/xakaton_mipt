@@ -1,0 +1,22 @@
+Группа признаков 4
+========================================
+
+1. contact_Число сделок
+2. lead_Состав заказа
+3. lead_source
+4. lead_Нумерация сделки
+5. contact_Адрес ПВЗ
+6. days_to_outcome
+7. lead_Линейная ширина (см)
+8. lead_Сумма заказа
+9. lead_Скидка
+10. lead_status_id
+11. closed_ts
+12. contact_updated_at
+13. contact_id
+14. lead_Список товаров GoSklad
+15. lead_Тип отправления
+16. days_sale_to_handed
+17. lead_updated_at
+18. sale_ts
+19. lead_Дата приобретения изделия
