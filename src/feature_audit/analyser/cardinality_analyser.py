@@ -1,7 +1,8 @@
 import pandas as pd
+from .base import BaseAnalyzer, AnalyzerResult
 
-from project2.src.feature_audit.analyser.base import BaseAnalyzer, AnalyzerResult
-from project2.src.feature_audit.utils import drop_columns, get_non_empty_series
+
+from ..utils import drop_columns, get_non_empty_series
 
 
 class HighCardinalityAnalyzer(BaseAnalyzer):

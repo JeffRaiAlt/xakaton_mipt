@@ -15,11 +15,13 @@ from .analyser.dominant_analyser import DominantValueAnalyzer
 from .analyser.duplicates_analyser import DuplicateFeatureAnalyzer
 from .analyser.empty_features_analyser import EmptyFeatureAnalyzer
 from .analyser.manual_dropper_analyser import ManualDropAnalyzer
-from .analyser.feature_analyser_5_structured import LeadFeatureEngineeringAnalyzer
+from .analyser.feature_analyser_5_structured import (
+    LeadFeatureEngineeringAnalyzer)
 from .analyser.numeric_feature_correlation_analyser import (
     NumericFeatureCorrelationAnalyzer,
 )
-from .analyser.numeric_target_correlation_analyser import NumericTargetCorrelationAnalyzer
+from .analyser.numeric_target_correlation_analyser import (
+    NumericTargetCorrelationAnalyzer)
 from .analyser.order_analyser import DateOrderAnalyzer
 from .logger import AuditLogger
 from .utils import build_step_report, save_report
@@ -255,7 +257,7 @@ class FeatureCleaningPipeline:
         self,
         df: pd.DataFrame,
         report_path: (str | Path) | None = None,
-    ) -> tuple[pd.DataFrame, dict[str, Any]]:
+    ) -> pd.DataFrame:
         work_df = df.copy()
         self._init_report(work_df)
 
@@ -333,7 +335,7 @@ class FeatureCleaningPipeline:
             log_fn=self._log_date_order,
         )
 
-        self._run_analyze_step(
+        """self._run_analyze_step(
             work_df=work_df,
             analyzer=NumericTargetCorrelationAnalyzer(target_column=self.target_column),
             title="КОРРЕЛЯЦИЯ ЧИСЛОВЫХ ПРИЗНАКОВ С TARGET",
@@ -356,6 +358,7 @@ class FeatureCleaningPipeline:
             action="analyze_numeric_feature_correlation",
             log_fn=self._log_numeric_feature_corr,
         )
+        """
 
         work_df = self._run_transform_step(
             work_df=work_df,
@@ -369,4 +372,4 @@ class FeatureCleaningPipeline:
         if report_path is not None:
             save_report(self.report, report_path)
 
-        return work_df, self.report
+        return work_df

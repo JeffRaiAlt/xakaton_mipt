@@ -1,7 +1,7 @@
 import pandas as pd
 
-from project2.src.feature_audit.analyser.base import BaseAnalyzer, AnalyzerResult
-from project2.src.feature_audit.utils import calc_column_similarity, drop_columns, to_string_series
+from .base import BaseAnalyzer, AnalyzerResult
+from ..utils import calc_column_similarity, drop_columns, to_string_series
 
 
 class DuplicateFeatureAnalyzer(BaseAnalyzer):

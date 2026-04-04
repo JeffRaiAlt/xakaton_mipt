@@ -1,36 +1,6 @@
 
 # Project: notebook-first feature engineering workflow
 
-## Структура
-
-project/
-├── data/
-│   ├── raw/
-│   │   └── MIPT_hackathon_dataset.csv
-│   └── feature_groups/
-│       └── features_group_1.txt ... features_group_5.txt
-├── notebooks/
-│   └── group_1 ... group_5/
-│       └── feature_processing_template.ipynb
-├── notebook_outputs/
-│   └── group_1 ... group_5/
-├── assembled_outputs/
-├── src/
-│   ├── utils/
-│   │   ├── io.py
-│   │   └── feature_spec.py
-│   ├── assembler/
-│   │   ├── assemble_dataset.py
-│   │   └── assemble_dataset_notebook.py
-│   └── features/
-│       └── group_1 ... group_5/
-│           ├── feature_processor.py
-│           ├── example_feature_spec.json
-│           └── example_usage.py
-└── requirements.txt
-
----
-
 ## Как работать
 
 ### Вариант 1. Исследование через ноутбуки

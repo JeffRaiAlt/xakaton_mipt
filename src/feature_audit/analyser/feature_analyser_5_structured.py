@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from project2.src.feature_audit.analyser.base import BaseAnalyzer, AnalyzerResult
+from .base import BaseAnalyzer, AnalyzerResult
 
 class LeadFeatureEngineeringAnalyzer(BaseAnalyzer):
     """Структурированный feature engineering для набора lead_*.

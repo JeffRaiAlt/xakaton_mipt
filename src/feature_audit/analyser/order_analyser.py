@@ -1,7 +1,7 @@
 import pandas as pd
 
-from project2.src.feature_audit.analyser.base import BaseAnalyzer, AnalyzerResult
-from project2.src.feature_audit.utils import try_parse_datetime
+from .base import BaseAnalyzer, AnalyzerResult
+from ..utils import try_parse_datetime
 
 
 class DateOrderAnalyzer(BaseAnalyzer):

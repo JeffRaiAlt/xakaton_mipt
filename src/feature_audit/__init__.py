@@ -1,1 +1,1 @@
-from .feature_cleaning_pipeline import FeatureCleaningPipeline
+from .feature_cleaning_pipeline_base import FeatureCleaningPipeline

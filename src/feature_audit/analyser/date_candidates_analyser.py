@@ -3,7 +3,7 @@ import warnings
 
 import pandas as pd
 
-from project2.src.feature_audit.analyser.base import BaseAnalyzer, AnalyzerResult
+from .base import BaseAnalyzer, AnalyzerResult
 
 
 class DateCandidateAnalyzer(BaseAnalyzer):

@@ -1,7 +1,7 @@
 import pandas as pd
 
-from project2.src.feature_audit.analyser.base import BaseAnalyzer, AnalyzerResult
-from project2.src.feature_audit.utils import drop_columns
+from .base import BaseAnalyzer, AnalyzerResult
+from ..utils import drop_columns
 
 
 class ManualDropAnalyzer(BaseAnalyzer):

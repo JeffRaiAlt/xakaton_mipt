@@ -1,7 +1,7 @@
 import pandas as pd
 
-from project2.src.feature_audit.analyser.base import BaseAnalyzer, AnalyzerResult
-from project2.src.feature_audit.utils import safe_binary_target, safe_numeric
+from .base import BaseAnalyzer, AnalyzerResult
+from ..utils import safe_binary_target, safe_numeric
 
 
 class NumericTargetCorrelationAnalyzer(BaseAnalyzer):
