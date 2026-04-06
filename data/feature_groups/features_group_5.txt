@@ -7,16 +7,32 @@
 4. returned_ts
 5. lead_Служба доставки
 6. lead_Компания Отправитель
-7. lead_Ответственный за доставку
-8. lead_is_deleted
-9. lead_WIDTH
-10. lead_Почтовый индекс
-11. lead_group_id
-12. lead_Масса (гр)
-13. lead_closed_at
-14. contact_created_at
-15. lead_utm_medium
-16. lead_Категория и варианты выбора
-17. received_ts
-18. lead_Модель телефона
-19. lead_id
+7. lead_group_id
+8. lead_Масса (гр)
+9. lead_closed_at
+10. contact_created_at
+11. lead_utm_medium
+12. lead_Категория и варианты выбора
+13. received_ts
+14. lead_Модель телефона
+15. handed_to_delivery_ts
+16. lead_utm_campaign
+17. contact_Источник трафика
+18. lead_Дата перехода в Сборку
+19. lead_utm_term
+20. lead_utm_sky
+21. rejected_ts
+22. lead_group
+23. lead_Дата перехода Передан в доставку
+24. lead_Проблема
+25. contact_updated_at
+26. lead_Высота
+27. lead_Стоимость доставки
+28. row_id
+
+29. buyout_flag
+30. lead_created_at
+
+
+
+

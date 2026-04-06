@@ -10,109 +10,79 @@ sys.path.append(str(PROJECT_ROOT))
 
 def load_notebook_outputs(
     block_dirs: Iterable[str | Path],
-    features_root: str | Path | None = None,
-    convert_specs_to_json: bool = True,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Загружает результаты, сохраненные из исследовательских ноутбуков.
 
-    Для каждой папки ожидаются:
-    - X_block.csv
-    - feature_spec.csv
-
-    Дополнительно:
-    - если convert_specs_to_json=True, то для каждой группы автоматически
-      создается/обновляется JSON-файл:
-      src/features/group_X/example_feature_spec.json
-
-    Parameters
-    ----------
-    block_dirs:
-        Список директорий вида notebook_outputs/group_X
-    features_root:
-        Корень папки src/features. Если None, JSON не сохраняются автоматически,
-        кроме случая запуска через __main__, где путь вычисляется от проекта.
-    convert_specs_to_json:
-        Нужно ли автоматически конвертировать feature_spec.csv -> JSON
-
-    Returns
-    -------
-    final_dataset, final_feature_spec
-    """
     blocks = []
-    specs = []
-
-    features_root = Path(features_root) if features_root is not None else None
+    #specs = []
 
     for block_dir in block_dirs:
         block_dir = Path(block_dir)
 
-        x_path = block_dir / "X_block.csv"
-        spec_path = block_dir / "feature_spec.csv"
+        x_files = sorted(block_dir.glob("X_block*.csv"))
+        spec_files = sorted(block_dir.glob("feature_spec*.csv"))
 
-        if not x_path.exists():
-            raise FileNotFoundError(f"Не найден файл: {x_path}")
-        if not spec_path.exists():
-            raise FileNotFoundError(f"Не найден файл: {spec_path}")
+        print(block_dir)
+        print("x_files:", x_files)
+        print("spec_files:", spec_files)
 
-        X_block = pd.read_csv(x_path)
-        feature_spec = pd.read_csv(spec_path)
+        if x_files:
+            group_df = None
 
-        # group name = имя папки notebook_outputs/group_X -> group_X
-        group_name = block_dir.name
+            for x_path in x_files:
+                df = pd.read_csv(x_path)
 
+                if "row_id" not in df.columns:
+                    raise ValueError(f"{x_path} не содержит row_id")
 
+                if group_df is None:
+                    group_df = df
+                else:
+                    group_df = group_df.merge(df, on="row_id", how="inner")
 
-        blocks.append(X_block)
-        specs.append(feature_spec)
+            blocks.append(group_df)
 
-    final_dataset = pd.concat(blocks, axis=1) if blocks else pd.DataFrame()
-    final_feature_spec = pd.concat(specs, axis=0, ignore_index=True) if specs else pd.DataFrame()
-    print(final_feature_spec)
+        if spec_files:
+            group_spec = pd.concat(
+                [pd.read_csv(p) for p in spec_files],
+                ignore_index=True
+            )
+            #specs.append(group_spec)
 
-    if not final_dataset.empty and final_dataset.columns.duplicated().any():
+    if not blocks:
+        raise ValueError("Не найдено ни одного X_block*.csv")
+
+    final_dataset = blocks[0]
+    for df in blocks[1:]:
+        final_dataset = final_dataset.merge(df, on="row_id", how="inner")
+
+    #if specs:
+    #    final_feature_spec = pd.concat(specs, ignore_index=True)
+    #else:
+    #    final_feature_spec = pd.DataFrame()
+
+    if final_dataset.columns.duplicated().any():
         duplicates = final_dataset.columns[final_dataset.columns.duplicated()].tolist()
-        raise ValueError(f"Найдены дубли колонок в итоговом датасете: {duplicates}")
+        raise ValueError(f"Дубли колонок: {duplicates}")
 
-    #if not final_feature_spec.empty and final_feature_spec[
-    #    # "name"].duplicated().any():
-    #    duplicates = final_feature_spec.loc[
-    #        final_feature_spec["name"].duplicated(), "name"
-    #    ].tolist()
-    #    raise ValueError(f"Найдены дубли имен в feature_spec:
-    #    {duplicates}")
-
-    return final_dataset, final_feature_spec
+    return final_dataset, pd.DataFrame()
 
 
 if __name__ == "__main__":
     project_root = Path(__file__).resolve().parents[2]
 
     block_dirs = [
-        #project_root / "notebook_outputs" / "group_1",
-        #project_root / "notebook_outputs" / "group_2",
-        #project_root / "notebook_outputs" / "group_3",
-        #project_root / "notebook_outputs" / "group_4",
+        project_root / "notebook_outputs" / "group_1",
+        project_root / "notebook_outputs" / "group_2",
+        project_root / "notebook_outputs" / "group_3",
+        project_root / "notebook_outputs" / "group_4",
         project_root / "notebook_outputs" / "group_5",
     ]
 
-    final_dataset, final_feature_spec = load_notebook_outputs(
-        block_dirs=block_dirs,
-        features_root=project_root / "src" / "features",
-        convert_specs_to_json=True,
-    )
+    final_dataset, _ = load_notebook_outputs(block_dirs=block_dirs)
 
-    #output_dir = project_root / "assembled_outputs"
-    #output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = project_root / "assembled_outputs"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    #final_dataset.to_csv(output_dir /
-    # "final_dataset_from_notebooks.csv", index=False)
+    final_dataset.to_csv(output_dir / "final_dataset_from_notebooks.csv", index=False)
     #final_feature_spec.to_csv(output_dir /
     # "feature_spec_from_notebooks.csv", index=False)
-
-    #print("Saved dataset:", output_dir /
-    # "final_dataset_from_notebooks.csv")
-    #print("Saved feature spec:", output_dir /
-    # "feature_spec_from_notebooks.csv")
-    #print(final_dataset.shape)
-    #print(final_feature_spec.shape)

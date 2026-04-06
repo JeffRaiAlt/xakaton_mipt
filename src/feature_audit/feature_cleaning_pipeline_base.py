@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 from pathlib import Path
+import numpy as np
 
 import pandas as pd
 
@@ -303,6 +304,7 @@ class FeatureCleaningPipeline:
             action="drop_manual_features",
             log_fn=self._log_manual_drop,
         )
+        """
 
         date_candidate_result = self._run_analyze_step(
             work_df=work_df,
@@ -335,7 +337,7 @@ class FeatureCleaningPipeline:
             log_fn=self._log_date_order,
         )
 
-        """self._run_analyze_step(
+        self._run_analyze_step(
             work_df=work_df,
             analyzer=NumericTargetCorrelationAnalyzer(target_column=self.target_column),
             title="КОРРЕЛЯЦИЯ ЧИСЛОВЫХ ПРИЗНАКОВ С TARGET",
@@ -358,7 +360,7 @@ class FeatureCleaningPipeline:
             action="analyze_numeric_feature_correlation",
             log_fn=self._log_numeric_feature_corr,
         )
-        """
+        
 
         work_df = self._run_transform_step(
             work_df=work_df,
@@ -366,7 +368,8 @@ class FeatureCleaningPipeline:
             title="LEAD FEATURE ENGINEERING",
             action="lead_feature_analyzer",
             log_fn=lambda result: None,
-        )
+        )"""
+        work_df["row_id"] = np.arange(len(work_df))
 
         self._finalize_report(work_df)
         if report_path is not None:
