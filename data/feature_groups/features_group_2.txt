@@ -1,6 +1,7 @@
 Группа признаков 2
 ========================================
 
+1. row_id
 2. contact_Код ПВЗ
 3. lead_Вес (грамм)*
 4. lead_Объявленная ценность (руб)
@@ -15,7 +16,6 @@
 16. lead_FORMNAME
 17. outcome_unknown
 19. lead_Дата получения денег на Р/С
-20. lead_type
 21. lead_utm_group
 22. lead_utm_referrer
 23. lead_roistat
