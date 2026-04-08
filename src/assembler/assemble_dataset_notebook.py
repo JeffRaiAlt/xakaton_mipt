@@ -18,12 +18,10 @@ def load_notebook_outputs(
     for block_dir in block_dirs:
         block_dir = Path(block_dir)
 
-        x_files = sorted(block_dir.glob("X_block*.csv"))
-        spec_files = sorted(block_dir.glob("feature_spec*.csv"))
+        x_files = sorted(block_dir.glob("*.csv"))
 
         print(block_dir)
         print("x_files:", x_files)
-        print("spec_files:", spec_files)
 
         if x_files:
             group_df = None
@@ -41,12 +39,6 @@ def load_notebook_outputs(
 
             blocks.append(group_df)
 
-        if spec_files:
-            group_spec = pd.concat(
-                [pd.read_csv(p) for p in spec_files],
-                ignore_index=True
-            )
-            #specs.append(group_spec)
 
     if not blocks:
         raise ValueError("Не найдено ни одного X_block*.csv")
@@ -55,10 +47,6 @@ def load_notebook_outputs(
     for df in blocks[1:]:
         final_dataset = final_dataset.merge(df, on="row_id", how="inner")
 
-    #if specs:
-    #    final_feature_spec = pd.concat(specs, ignore_index=True)
-    #else:
-    #    final_feature_spec = pd.DataFrame()
 
     if final_dataset.columns.duplicated().any():
         duplicates = final_dataset.columns[final_dataset.columns.duplicated()].tolist()
@@ -84,5 +72,3 @@ if __name__ == "__main__":
     output_dir.mkdir(parents=True, exist_ok=True)
 
     final_dataset.to_csv(output_dir / "final_dataset_from_notebooks.csv", index=False)
-    #final_feature_spec.to_csv(output_dir /
-    # "feature_spec_from_notebooks.csv", index=False)
