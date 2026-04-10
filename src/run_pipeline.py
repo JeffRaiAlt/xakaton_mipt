@@ -7,7 +7,7 @@ from feature_audit.feature_cleaning_pipeline_base import (
 
 
 DATA_PATH = Path("../data/raw/dataset_2025-03-01_2026-03-29_external.csv")
-OUTPUT_DATA_PATH = Path("../data/raw/clean_dataset_step2.csv")
+OUTPUT_DATA_PATH = Path("../data/raw/clean_dataset.csv")
 REPORT_PATH = Path("feature_cleaning_report.json")
 
 
