@@ -1,0 +1,84 @@
+import numpy as np
+import pandas as pd
+
+
+def preprocess_initial_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    df = df[~df["buyout_flag"].isna()].copy()
+    df["buyout_flag"] = df["buyout_flag"].astype(int)
+    df["contact_pvz_code"] = df["contact_pvz_code"].replace("HOME", "unknown")
+    df["contact_has_pvz_code"] = np.where(
+        df["contact_pvz_code"] == "unknown", 0, 1
+    )
+    col = "contact_pvz_code"
+    df[col] = df[col].astype(str)
+    top15 = df.loc[df[col] != "unknown", col].value_counts().head(15).index
+    df[col] = df[col].apply(
+        lambda x: x if x == "unknown" else (x if x in top15 else "rare_code")
+    )
+    df = df.drop(
+        columns=[
+            "contact_loyalty",
+            "row_id",
+            "contact_LTV",
+            "has_contact_LTV",
+            "buyout_flag_lag30",
+            "buyout_flag_lag60",
+            "buyout_flag_ma30",
+            "lead_utm_content",
+            "sale_date",
+            "lead_pipeline_id",
+        ]
+    )
+    df[["sale_ts", "lead_created_ts"]] = df[
+        ["sale_ts", "lead_created_ts"]
+    ].astype("datetime64[ns]")
+    return df
+
+
+def split_dataset(df: pd.DataFrame):
+    split = int(len(df) * 0.8)
+
+    train = df.iloc[:split]
+    test = df.iloc[split:]
+
+    X_train = train.drop(columns=["buyout_flag", "sale_ts"])
+    y_train = train["buyout_flag"]
+
+    X_test = test.drop(columns=["buyout_flag", "sale_ts"])
+    y_test = test["buyout_flag"]
+    return X_train, y_train, X_test, y_test
+
+
+def split_dataset_with_val(df: pd.DataFrame, val_size=0.1):
+    n = len(df)
+    train_end = int(n * 0.8)
+    val_end = int(train_end * (1 - val_size))
+
+    train = df.iloc[:val_end]
+    val   = df.iloc[val_end:train_end]
+    test  = df.iloc[train_end:]
+
+    X_train = train.drop(columns=["buyout_flag", "sale_ts"])
+    y_train = train["buyout_flag"]
+
+    X_val = val.drop(columns=["buyout_flag", "sale_ts"])
+    y_val = val["buyout_flag"]
+
+    X_test = test.drop(columns=["buyout_flag", "sale_ts"])
+    y_test = test["buyout_flag"]
+
+    return X_train, y_train, X_val, y_val, X_test, y_test
+
+
+def remove_log_features(df: pd.DataFrame) -> pd.DataFrame:
+    df["lead_Стоимость доставки"] = (
+    df["lead_Стоимость доставки"]
+    .replace("-", np.nan)
+    .astype(str)
+    .str.replace(",", ".", regex=False)
+    )
+    df["lead_Стоимость доставки"] = pd.to_numeric(df["lead_Стоимость доставки"], errors="coerce")
+    df[["lead_Стоимость доставки", "lead_Масса (гр)", "lead_Высота"]] = df[
+        ["lead_Стоимость доставки", "lead_Масса (гр)", "lead_Высота"]
+    ].fillna(-1)
+    return df.drop(columns=["delivery_cost_log", "lead_height_log", "lead_mass_log"])
