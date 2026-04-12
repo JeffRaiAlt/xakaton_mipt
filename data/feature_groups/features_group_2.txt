@@ -1,13 +1,11 @@
 Группа признаков 2
 ========================================
 
-1. lead_LEADQUALIFYCATION
+1. row_id
 2. contact_Код ПВЗ
 3. lead_Вес (грамм)*
 4. lead_Объявленная ценность (руб)
 5. lead_будущие покупки
-6. lead_Сумма наложенного платежа (руб)
-7. lead_ACTUAL-FORMAT
 8. lead_responsible_user_id
 9. lead_Тариф Доставки
 10. lead_Линейная длина (см)
@@ -15,8 +13,13 @@
 12. lead_Дата создания сделки
 13. contact_LTV
 14. sale_date
-15. lead_LTV
 16. lead_FORMNAME
 17. outcome_unknown
-18. lead_loss_reason_id
 19. lead_Дата получения денег на Р/С
+21. lead_utm_group
+22. lead_utm_referrer
+23. lead_roistat
+24. lead_tags
+25. lead_utm_source
+26. contact_responsible_user_id
+27. lead_Квалификация лида
