@@ -270,13 +270,13 @@ class FeatureCleaningPipeline:
             log_fn=self._log_empty_features,
         )
 
-        work_df = self._run_transform_step(
+        """work_df = self._run_transform_step(
             work_df=work_df,
             analyzer=HighCardinalityAnalyzer(),
             title="ПОИСК И УДАЛЕНИЕ HIGH-CARDINALITY ПОЛЕЙ",
             action="drop_high_cardinality_features",
             log_fn=self._log_high_cardinality,
-        )
+        )"""
 
         work_df = self._run_transform_step(
             work_df=work_df,
