@@ -21,25 +21,10 @@ class FeatureSelectorConfig:
     n_splits: int = 5
     n_trials: int = 25
     top_n: int = 50
-    start_date: str | None = "2025-03-01"
-    end_date: str | None = "2026-03-29"
+    start_date: str | None = None
+    end_date: str | None = None
     date_filter_col: str = "lead_created_dt"
-    drop_cols: tuple[str, ...] = (
-        "contact_LTV",
-        "has_contact_LTV",
-        "contact_loyalty",
-        "buyout_flag_lag30",
-        "buyout_flag_lag60",
-        "buyout_flag_ma30",
-        "row_id",
-        "lead_created_dt",
-        "lead_utm_id_1",
-        "lead_utm_id_2",
-        "lead_utm_id_3",
-        "lead_utm_position",
-        "lead_utm_reatrgeting_id",
-        "sale_date",
-    )
+    drop_cols: tuple[str, ...] | None = None,
 
 
 class RandomForestFeatureSelector:
@@ -184,25 +169,10 @@ def prepare_features_fr(
     n_splits: int = 5,
     n_trials: int = 25,
     top_n: int = 50,
-    start_date: str | None = "2025-03-01",
-    end_date: str | None = "2026-03-29",
+    start_date: str | None = None,
+    end_date: str | None = None,
     date_filter_col: str = "lead_created_dt",
-    drop_cols: tuple[str, ...] = (
-        "contact_LTV",
-        "has_contact_LTV",
-        "contact_loyalty",
-        "buyout_flag_lag30",
-        "buyout_flag_lag60",
-        "buyout_flag_ma30",
-        "row_id",
-        "lead_created_dt",
-        "lead_utm_id_1",
-        "lead_utm_id_2",
-        "lead_utm_id_3",
-        "lead_utm_position",
-        "lead_utm_reatrgeting_id",
-        "sale_date",
-    ),
+    drop_cols: tuple[str, ...] | None = None,
 ) -> dict:
     config = FeatureSelectorConfig(
         data_path=data_path,

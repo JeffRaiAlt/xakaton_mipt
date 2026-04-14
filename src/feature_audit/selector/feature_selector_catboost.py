@@ -23,24 +23,8 @@ class FeatureSelectorCatBoostConfig:
     start_date: str | None = None
     end_date: str | None = None
     date_filter_col: str | None = "lead_created_dt"
-    leakage_cols: tuple[str, ...] = (
-        "contact_LTV",
-        "has_contact_LTV",
-        "contact_loyalty",
-        "buyout_flag_lag30",
-        "buyout_flag_lag60",
-        "buyout_flag_ma30",
-        "row_id",
-    )
-    drop_cols: tuple[str, ...] = (
-        "lead_created_dt",
-        "lead_utm_id_1",
-        "lead_utm_id_2",
-        "lead_utm_id_3",
-        "lead_utm_position",
-        "lead_utm_reatrgeting_id",
-        "sale_date",
-    )
+    drop_cols: tuple[str, ...] | None = None
+
 
 
 class FeatureSelectorCatBoost:
@@ -51,8 +35,6 @@ class FeatureSelectorCatBoost:
         df = pd.read_csv(self.config.data_path, low_memory=False)
         df = df[df[self.config.target].notna()].copy()
         df[self.config.target] = df[self.config.target].astype(int)
-
-        df = df.drop(columns=list(self.config.leakage_cols), errors="ignore")
 
         if self.config.date_filter_col and self.config.date_filter_col in df.columns:
             df[self.config.date_filter_col] = pd.to_datetime(
@@ -246,24 +228,7 @@ def prepare_features_cat(
     start_date: str | None = None,
     end_date: str | None = None,
     date_filter_col: str | None = "lead_created_dt",
-    leakage_cols: tuple[str, ...] = (
-        "contact_LTV",
-        "has_contact_LTV",
-        "contact_loyalty",
-        "buyout_flag_lag30",
-        "buyout_flag_lag60",
-        "buyout_flag_ma30",
-        "row_id",
-    ),
-    drop_cols: tuple[str, ...] = (
-        "lead_created_dt",
-        "lead_utm_id_1",
-        "lead_utm_id_2",
-        "lead_utm_id_3",
-        "lead_utm_position",
-        "lead_utm_reatrgeting_id",
-        "sale_date",
-    ),
+    drop_cols: tuple[str, ...] | None = None,
 ) -> dict:
     config = FeatureSelectorCatBoostConfig(
         data_path=data_path,
@@ -277,7 +242,6 @@ def prepare_features_cat(
         start_date=start_date,
         end_date=end_date,
         date_filter_col=date_filter_col,
-        leakage_cols=leakage_cols,
         drop_cols=drop_cols,
     )
     return FeatureSelectorCatBoost(config).prepare_features_cat()

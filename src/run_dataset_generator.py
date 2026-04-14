@@ -27,10 +27,30 @@ INPUT_PATH = PROJECT_ROOT / "assembled_outputs" / "final_dataset_from_notebooks.
 
 
 RANDOM_STATE = 42
-N_SPLITS = 5
+N_SPLITS = 3
 TOP_N = 50
 START_DATE = "2025-03-01"
 END_DATE = "2026-03-29"
+
+# тюнинг, признаки которые не внушают по тем или иным причинам доверия
+# можно выкинуть из нового dataset
+drop_cols = (
+        "contact_LTV",
+        "has_contact_LTV",
+        "contact_loyalty",
+        "buyout_flag_lag30",
+        "buyout_flag_lag60",
+        "buyout_flag_ma30",
+        "row_id",
+        "lead_created_dt",
+        "lead_utm_id_1",
+        "lead_utm_id_2",
+        "lead_utm_id_3",
+        "lead_utm_position",
+        "lead_utm_reatrgeting_id",
+        "sale_date",
+        "lead_Квалификация лида"
+    )
 
 if __name__ == "__main__":
 
@@ -42,11 +62,12 @@ if __name__ == "__main__":
         random_state=RANDOM_STATE,
         test_size=0.2,
         n_splits=N_SPLITS,
-        n_trials=1,
+        n_trials=15,
         top_n=TOP_N,
         start_date=START_DATE,
         end_date=END_DATE,
         date_filter_col="lead_created_dt",
+        drop_cols=drop_cols
     )
 
     print("Train ROC-AUC (FR):", result["train_roc_auc"])
@@ -60,11 +81,12 @@ if __name__ == "__main__":
         random_state=RANDOM_STATE,
         test_size=0.2,
         n_splits=N_SPLITS,
-        n_trials=1,
+        n_trials=10,
         top_n=TOP_N,
         start_date=START_DATE,
         end_date=END_DATE,
         date_filter_col="lead_created_dt",
+        drop_cols=drop_cols
     )
 
     print("Train ROC-AUC (CAT):", result["train_roc_auc"])
@@ -78,11 +100,12 @@ if __name__ == "__main__":
         random_state=RANDOM_STATE,
         test_size=0.2,
         n_splits=N_SPLITS,
-        n_trials=1,
+        n_trials=15,
         top_n=TOP_N,
         start_date=START_DATE,
         end_date=END_DATE,
         date_filter_col="lead_created_dt",
+        drop_cols=drop_cols
     )
 
     print("Train ROC-AUC (REG):", result["train_roc_auc"])
