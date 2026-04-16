@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from catboost import CatBoostClassifier, Pool, EFstrType
+from sklearn.metrics import roc_auc_score, log_loss, average_precision_score
 
 
 def preprocess_initial_dataset(df: pd.DataFrame) -> pd.DataFrame:
@@ -55,8 +57,8 @@ def split_dataset_with_val(df: pd.DataFrame, val_size=0.1):
     val_end = int(train_end * (1 - val_size))
 
     train = df.iloc[:val_end]
-    val   = df.iloc[val_end:train_end]
-    test  = df.iloc[train_end:]
+    val = df.iloc[val_end:train_end]
+    test = df.iloc[train_end:]
 
     X_train = train.drop(columns=["buyout_flag", "sale_ts"])
     y_train = train["buyout_flag"]
@@ -72,13 +74,75 @@ def split_dataset_with_val(df: pd.DataFrame, val_size=0.1):
 
 def remove_log_features(df: pd.DataFrame) -> pd.DataFrame:
     df["lead_Стоимость доставки"] = (
-    df["lead_Стоимость доставки"]
-    .replace("-", np.nan)
-    .astype(str)
-    .str.replace(",", ".", regex=False)
+        df["lead_Стоимость доставки"]
+        .replace("-", np.nan)
+        .astype(str)
+        .str.replace(",", ".", regex=False)
     )
-    df["lead_Стоимость доставки"] = pd.to_numeric(df["lead_Стоимость доставки"], errors="coerce")
+    df["lead_Стоимость доставки"] = pd.to_numeric(
+        df["lead_Стоимость доставки"], errors="coerce"
+    )
     df[["lead_Стоимость доставки", "lead_Масса (гр)", "lead_Высота"]] = df[
         ["lead_Стоимость доставки", "lead_Масса (гр)", "lead_Высота"]
     ].fillna(-1)
-    return df.drop(columns=["delivery_cost_log", "lead_height_log", "lead_mass_log"])
+    return df.drop(
+        columns=["delivery_cost_log", "lead_height_log", "lead_mass_log"]
+    )
+
+
+def evaluate(model, X, y):
+    y_refuse = (y == 0).astype(int)
+    proba_refuse = model.predict_proba(X)[:, 0]
+    return {
+        "ROC_AUC": roc_auc_score(y_refuse, proba_refuse),
+        "PR_AUC": average_precision_score(y_refuse, proba_refuse),
+        "LogLoss": log_loss(y, model.predict_proba(X)),
+    }
+
+
+def train_catboost_model(X_train, y_train, X_val, y_val, X_test, y_test):
+    # категориальные признаки
+    cat_features = X_train.select_dtypes(
+        include=["object", "category"]
+    ).columns.tolist()
+
+    # модель
+    model = CatBoostClassifier(
+        iterations=2000,
+        depth=6,
+        learning_rate=0.1,
+        verbose=100,
+        cat_features=cat_features,
+        random_state=42,
+        class_weights={0: 1, 1: 5},
+        eval_metric="AUC",
+        early_stopping_rounds=100,
+    )
+
+    # обучение
+    model.fit(X_train, y_train, eval_set=(X_val, y_val))
+
+    # метрики
+    metrics = evaluate(model, X_test, y_test)
+
+    return model, metrics
+
+
+def get_feature_importance_df(
+    model, X_train: pd.DataFrame, y_train: pd.Series
+) -> pd.DataFrame:
+    cat_features = X_train.select_dtypes(
+        include=["object", "category"]
+    ).columns.tolist()
+
+    train_pool = Pool(data=X_train, label=y_train, cat_features=cat_features)
+
+    importances = model.get_feature_importance(
+        data=train_pool, type=EFstrType.FeatureImportance
+    )
+
+    fi = pd.DataFrame(
+        {"feature": X_train.columns, "importance": importances}
+    ).sort_values(by="importance", ascending=False)
+
+    return fi
