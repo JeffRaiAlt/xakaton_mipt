@@ -92,7 +92,7 @@ def remove_log_features(df: pd.DataFrame) -> pd.DataFrame:
 
 def evaluate(model, X, y):
     y_refuse = (y == 0).astype(int)
-    proba_refuse = model.predict_proba(X)[:, 0]
+    proba_refuse = model.predict_proba(X)[:, 1]
     return {
         "ROC_AUC": roc_auc_score(y_refuse, proba_refuse),
         "PR_AUC": average_precision_score(y_refuse, proba_refuse),
@@ -106,6 +106,10 @@ def train_catboost_model(X_train, y_train, X_val, y_val, X_test, y_test):
         include=["object", "category"]
     ).columns.tolist()
 
+    #  Переворачиваем метки: теперь positive класс = отказ от выкупа (buyout_flag == 0)
+    y_train_refuse = (y_train == 0).astype(int)
+    y_val_refuse   = (y_val == 0).astype(int)
+
     # модель
     model = CatBoostClassifier(
         iterations=2000,
@@ -115,12 +119,12 @@ def train_catboost_model(X_train, y_train, X_val, y_val, X_test, y_test):
         cat_features=cat_features,
         random_state=42,
         class_weights={0: 1, 1: 5},
-        eval_metric="AUC",
+        eval_metric="PRAUC",
         early_stopping_rounds=100,
     )
 
     # обучение
-    model.fit(X_train, y_train, eval_set=(X_val, y_val))
+    model.fit(X_train, y_train_refuse, eval_set=(X_val, y_val_refuse))
 
     # метрики
     metrics = evaluate(model, X_test, y_test)
