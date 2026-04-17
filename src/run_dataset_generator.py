@@ -3,6 +3,7 @@ from pathlib import Path
 
 from feature_audit.selector.dataset_creator import do_work
 from feature_audit.selector.strategies.weighted_rank_conflict import WeightedRankConflictStrategy
+from feature_audit.selector.strategies.weighted_voting import WeightedVotingSelectionStrategy
 from feature_audit.selector.feature_selector_fr import prepare_features_fr
 from feature_audit.selector.feature_selector_catboost import prepare_features_cat
 from feature_audit.selector.feature_selector_logreg import prepare_features_reg
@@ -53,7 +54,7 @@ drop_cols = (
     )
 
 if __name__ == "__main__":
-
+    """
     # Step1 готовим список признаков
     result = prepare_features_fr (
         data_path=str(INPUT_PATH),
@@ -110,24 +111,35 @@ if __name__ == "__main__":
 
     print("Train ROC-AUC (REG):", result["train_roc_auc"])
     print("Test ROC-AUC (REG):", result["test_roc_auc"])
-    print("N selected (REG):", len(result["selected_features"]))
+    print("N selected (REG):", len(result["selected_features"]))"""
 
-    strategy = WeightedRankConflictStrategy(
+    """strategy = WeightedRankConflictStrategy(
         logreg_path=RESULT_OUTPUT_DIR / "best_features_logreg_filter.csv",
         rf_path=RESULT_OUTPUT_DIR / "best_features_rf_filter.csv",
         catboost_path=RESULT_OUTPUT_DIR / "best_features_catboost.csv",
-        top_k=30,
-        final_top_n=40,
-        w_logreg=40,
-        w_rf=10,
-        w_cb=50,
+        top_k=50,
+        final_top_n=30,
+        w_logreg=80,
+        w_rf=1,
+        w_cb=19,
         random_state=RANDOM_STATE,
+    )"""
+
+    strategy = WeightedVotingSelectionStrategy(
+        logreg_path=RESULT_OUTPUT_DIR / "best_features_logreg_filter.csv",
+        rf_path=RESULT_OUTPUT_DIR / "best_features_rf_filter.csv",
+        catboost_path=RESULT_OUTPUT_DIR / "best_features_catboost.csv",
+        final_top_n=50,
+        w_logreg=40,
+        w_rf=20,
+        w_cb=40,
     )
 
-    do_work(
+    result = do_work(
         strategy,
         data_path=INPUT_PATH,
         output_path=TMP_OUTPUT_DIR / "final_dataset_reduced.csv",
     )
+    print(result)
 
 

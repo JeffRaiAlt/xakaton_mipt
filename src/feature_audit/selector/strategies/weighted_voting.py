@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
@@ -32,7 +31,7 @@ class WeightedVotingSelectionStrategy(FeatureSelectionStrategy):
         df_lr = self._prepare_rank_scores(
             df=df_lr_raw,
             feature_col="base_feature",
-            score_col="abs_coef",
+            score_col="max_abs_coef",
             top_k=self.top_k_logreg,
             prefix="lr",
         )
@@ -48,7 +47,7 @@ class WeightedVotingSelectionStrategy(FeatureSelectionStrategy):
         df_cb = self._prepare_rank_scores(
             df=df_cb_raw,
             feature_col="feature",
-            score_col="final_importance",
+            score_col="importance",
             top_k=self.top_k_cb,
             prefix="cb",
         )

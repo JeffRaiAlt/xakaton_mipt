@@ -100,7 +100,30 @@ class FeatureSelectorLogReg:
 
         return X_train, X_test, y_train, y_test, preprocessor, num_cols, cat_cols
 
+
     def _objective(self, trial, X_train, y_train, preprocessor) -> float:
+        class_weight_option = trial.suggest_categorical(
+            "class_weight",
+            [
+                "none",
+                "balanced",
+                "w2",
+                "w3",
+                "w5",
+            ]
+        )
+
+        if class_weight_option == "none":
+            class_weight = None
+        elif class_weight_option == "balanced":
+            class_weight = "balanced"
+        elif class_weight_option == "w2":
+            class_weight = {0: 2, 1: 1}
+        elif class_weight_option == "w3":
+            class_weight = {0: 3, 1: 1}
+        elif class_weight_option == "w5":
+            class_weight = {0: 5, 1: 1}
+
         model = Pipeline(
             [
                 ("preprocessor", preprocessor),
@@ -112,7 +135,7 @@ class FeatureSelectorLogReg:
                         l1_ratio=trial.suggest_categorical("l1_ratio", [0.5, 0.7, 0.9, 1.0]),
                         tol=trial.suggest_categorical("tol", [1e-3, 3e-3]),
                         max_iter=2000,
-                        class_weight=None,
+                        class_weight=class_weight,
                         random_state=self.config.random_state,
                     ),
                 ),
