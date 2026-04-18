@@ -29,12 +29,10 @@ def add_lead_utm_device_type(df: pd.DataFrame) -> pd.DataFrame:
         .fillna(-1)
         .astype("int")
     )
-
-    df["lead_utm_id_3"] = (
-        pd.to_numeric(df["lead_utm_id_3"], errors="coerce")
-        .fillna(-1)
-        .astype("int64")
-    )
+    df["lead_utm_id_3"] = np.where(
+        utm_parsed["utm_3"].isin(["unknown", "undefined", ""]), -1,
+        utm_parsed["utm_3"]
+    ).astype("int")
 
     df.loc[
         df["lead_utm_device_type"].isin(["undefined", ""]),
