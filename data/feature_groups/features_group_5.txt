@@ -33,6 +33,9 @@
 29. buyout_flag
 30. lead_created_at
 
-
-
+lead_id
+sale_ts
+outcome_unknown
+lead_price
+contact_id
 
