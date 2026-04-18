@@ -1,7 +1,13 @@
 import numpy as np
 import pandas as pd
+import re
 from catboost import CatBoostClassifier, Pool, EFstrType
 from sklearn.metrics import roc_auc_score, log_loss, average_precision_score
+from src.utils.contact_code_utils import (
+    exctract_code_pvz,
+    expand_cities_by_comma,
+    get_region,
+)
 
 
 def preprocess_initial_dataset(df: pd.DataFrame) -> pd.DataFrame:
@@ -52,6 +58,7 @@ def split_dataset(df: pd.DataFrame):
 
 
 def split_dataset_with_val(df: pd.DataFrame, val_size=0.1):
+    df = df.sort_values(by="sale_ts").reset_index(drop=True)
     n = len(df)
     train_end = int(n * 0.8)
     val_end = int(train_end * (1 - val_size))
@@ -96,7 +103,7 @@ def evaluate(model, X, y):
     return {
         "ROC_AUC": roc_auc_score(y_refuse, proba_refuse),
         "PR_AUC": average_precision_score(y_refuse, proba_refuse),
-        "LogLoss": log_loss(y, model.predict_proba(X)),
+        "LogLoss": log_loss(y_refuse, model.predict_proba(X)[:, 1]),
     }
 
 
@@ -108,7 +115,7 @@ def train_catboost_model(X_train, y_train, X_val, y_val, X_test, y_test):
 
     #  Переворачиваем метки: теперь positive класс = отказ от выкупа (buyout_flag == 0)
     y_train_refuse = (y_train == 0).astype(int)
-    y_val_refuse   = (y_val == 0).astype(int)
+    y_val_refuse = (y_val == 0).astype(int)
 
     # модель
     model = CatBoostClassifier(
@@ -150,3 +157,39 @@ def get_feature_importance_df(
     ).sort_values(by="importance", ascending=False)
 
     return fi
+
+
+def transform_contact_region_pvz(
+    df: pd.DataFrame, pvz_data: pd.DataFrame
+) -> pd.DataFrame:
+    # --- 1. извлекаем код ПВЗ ---
+    df["contact_Код ПВЗ"] = [
+        exctract_code_pvz(x) for x in df["contact_Код ПВЗ"]
+    ]
+
+    # --- 2. расширяем города ---
+    pvz_data = expand_cities_by_comma(pvz_data)
+
+    # --- 3. строим словарь prefix -> region ---
+    pvz_dict = {}
+    for pvz_code, region in zip(pvz_data.iloc[:, 2], pvz_data.iloc[:, 0]):
+        match = re.match(r"^([A-Z]+)", str(pvz_code))
+        if match:
+            pvz_dict[match.group(1)] = region
+
+    # --- 4. получаем регион ---
+    df["contact_region_pvz"] = df["contact_Код ПВЗ"].apply(
+        lambda x: get_region(x, pvz_dict)
+    )
+
+    # --- 5. оставляем top-15 + unknown ---
+    col = "contact_region_pvz"
+
+    mask = df[col] != "unknown"
+    top15 = df.loc[mask, col].value_counts().head(15).index
+
+    df[col] = df[col].where(
+        df[col].isin(top15) | (df[col] == "unknown"), "rare_region"
+    )
+
+    return df
