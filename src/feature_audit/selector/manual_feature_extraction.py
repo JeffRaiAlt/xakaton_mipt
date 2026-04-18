@@ -50,6 +50,9 @@ class ManualFeatureExtractor:
         df = self.transform_wight(df)
         #df = self.transform_cluster(df)
         df = self.transform_utm_content_chain(df)
+
+        # В конце!!!
+        df = self.transform_timedelta(df)
         return df
 
     def _load_data(self) -> pd.DataFrame:
@@ -446,6 +449,10 @@ class ManualFeatureExtractor:
         df["lead_creation_date_sin"] = df["lead_creation_date_sin"].fillna(-1)
         return df
 
+    def transform_timedelta(self, df: pd.DataFrame) -> pd.DataFrame:
+        df["sale_ts"] = self._safe_to_datetime(
+            df["sale_ts"], unit="s")
+        return df
 
     def transform_timedelta_and_created_features(self, df: pd.DataFrame) -> pd.DataFrame:
         if not {"sale_ts", "lead_created_at"}.issubset(df.columns):

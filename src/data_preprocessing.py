@@ -33,7 +33,8 @@ final_features_list = [
     'lead_group_missing',
     'lead_height_bin',
     'delivery_cost_missing',
-    'buyout_flag'
+    'buyout_flag',
+    'sale_ts'
 ]
 
 # 'sale_ts',
