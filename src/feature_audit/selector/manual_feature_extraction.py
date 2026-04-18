@@ -6,6 +6,7 @@ import openpyxl
 
 import numpy as np
 import pandas as pd
+from utils import process_lead_utm
 
 
 @dataclass
@@ -30,33 +31,25 @@ class ManualFeatureExtractor:
     def _transform(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
 
-        df = self.transform_width_features(df)
         df = self.transform_height_features(df)
         df = self.transform_payment_type(df)
         df = self.transform_delivery_type(df)
-        df = self.transform_lead_group_id(df)
-        df = self.transform_contact_time_features(df)
-
-        df = self.transform_utm_sky_features(df)
         df = self.transform_lead_group_grouped(df)
         df = self.transform_delivery_cost_features(df)
 
-        df = self.transform_contact_region_pvz(df)
         df = self.transform_lead_utm_group(df)
         df = self.transform_lead_utm_referrer_site(df)
         df = self.transform_lead_tags(df)
-        df = self.transform_utm_content_chain(df)
-        df = self.transform_lead_manager_category(df)
 
         df = self.transform_lead_creation_date_features(df)
-        df = self.transform_sale_date_features(df)
 
-        df = self.transform_source_feature(df)
         df = self.transform_timedelta_and_created_features(df)
         df = self.transform_length_feature(df)
-        df = self.transform_order_composition_features(df)
-        df = self.transform_discount_category(df)
+        #df = self.transform_mass(df)
+        df = self.transform_utm_campaign(df)
+        df = self.transform_wight(df)
         #df = self.transform_cluster(df)
+        df = self.transform_utm_content_chain(df)
         return df
 
     def _load_data(self) -> pd.DataFrame:
@@ -195,32 +188,14 @@ class ManualFeatureExtractor:
     # ------------------------------------------------------------------
     # feature-specific transforms
     # ------------------------------------------------------------------
-    def transform_width_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        col = "lead_Ширина"
-        if not self._column_exists(df, col):
-            return df
 
-        def width_category(x: object) -> str:
-            if pd.isna(x):
-                return "unknown"
-            if x < 27:
-                return "small"
-            if x <= 33:
-                return "medium"
-            if x <= 40:
-                return "large"
-            return "very_large"
-
-        mapping = {
-            "very_large": "high",
-            "small": "high",
-            "medium": "mid",
-            "large": "mid",
-            "unknown": "unknown",
-        }
-
-        df["width_cat"] = df[col].apply(width_category).map(mapping)
-        df["width_is_missing"] = df[col].isna().astype(int)
+    def transform_utm_campaign(self, df: pd.DataFrame) -> pd.DataFrame:
+        df["lead_utm_campaign"] = (df["lead_utm_campaign"].replace
+                                   (["{campaing_id}", "Неизвестно"],
+                                    np.nan))
+        # Признак сильно разреженный, отмечаем где не заполнен
+        df["lead_utm_campaign_missing"] = df[
+        "lead_utm_campaign"].isna().astype(int)
         return df
 
     def transform_height_features(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -246,6 +221,11 @@ class ManualFeatureExtractor:
             return "large"
 
         df["lead_height_bin"] = lead_height_clean.apply(height_bin)
+        df["lead_Высота"] = df["lead_Высота"].fillna(-1)
+        return df
+
+    def transform_wight(self, df: pd.DataFrame) -> pd.DataFrame:
+        df["has_weight"] = np.where(df["lead_Вес (грамм)*"].isna(), 0, 1)
         return df
 
     def transform_payment_type(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -284,44 +264,13 @@ class ManualFeatureExtractor:
         df["lead_delivery_type"] = df[source_col].apply(delivery_type)
         return df
 
-    def transform_lead_group_id(self, df: pd.DataFrame) -> pd.DataFrame:
-        col = "lead_group_id"
-        if self._column_exists(df, col):
-            df[col] = df[col].fillna("unknown")
-        return df
-
-    def transform_contact_time_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        if not {"contact_created_at", "lead_created_at"}.issubset(df.columns):
-            return df
-
-        contact_dt = self._safe_to_datetime(df["contact_created_at"], unit="s")
-        lead_dt = self._safe_to_datetime(df["lead_created_at"], unit="s")
-
-        df["contact_to_lead_hours"] = ((lead_dt - contact_dt).dt.total_seconds() / 3600).clip(lower=0)
-        df["contact_to_lead_hours"] = df["contact_to_lead_hours"].fillna(0)
-
-        df["contact_hour"] = contact_dt.dt.hour.fillna(-1)
-        df["contact_month"] = contact_dt.dt.month.fillna(-1)
-        return df
-
-    def transform_utm_sky_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        col = "lead_utm_sky"
-        if not self._column_exists(df, col):
-            return df
-
-        df[col] = df[col].replace(["{keyword}"], np.nan)
-        df["utm_sky_autotarget"] = (df[col] == "---autotargeting").astype(int)
-        df["utm_sky_brand"] = df[col].astype("string").str.contains(
-            "artraid|артрейд",
-            case=False,
-            na=False,
-        ).astype(int)
-        return df
-
     def transform_lead_group_grouped(self, df: pd.DataFrame) -> pd.DataFrame:
         col = "lead_group"
         if not self._column_exists(df, col):
             return df
+
+        # флаг пропуска
+        df["lead_group_missing"] = df["lead_group"].isna().astype(int)
 
         main_groups = ["yur", "but"]
         df["lead_group_grouped"] = df[col].where(df[col].isin(main_groups), "other")
@@ -346,32 +295,8 @@ class ManualFeatureExtractor:
             df["delivery_cost_missing"] = df["lead_shipping_cost"].isna().astype(int)
             df["lead_shipping_cost"] = df["lead_shipping_cost"].fillna(-1)
 
-        return df
+        df["lead_Стоимость доставки"] = df["lead_Стоимость доставки"].fillna(-1)
 
-    def transform_contact_region_pvz(self, df: pd.DataFrame) -> pd.DataFrame:
-        col = "contact_Код ПВЗ"
-        if not self._column_exists(df, col):
-            return df
-
-        pvz_series = pd.Series([self._extract_pvz_code(x) for x in df[col]], index=df.index)
-        pvz_series = self._replace_non_matching_pvz(pvz_series)
-        pvz_dict = self._load_pvz_dict()
-
-        def get_region(code: object) -> str:
-            if code == "HOME":
-                return "no_pvz"
-            if pd.isna(code) or code == "unknown":
-                return "unknown"
-            return pvz_dict.get(str(code), "unknown")
-
-        df["contact_region_pvz"] = pvz_series.apply(get_region)
-
-        mask = ~df["contact_region_pvz"].isin(["unknown", "no_pvz"])
-        top15 = df.loc[mask, "contact_region_pvz"].value_counts().index[:15]
-        df["contact_region_pvz"] = df["contact_region_pvz"].where(
-            df["contact_region_pvz"].isin(top15),
-            "rare_region",
-        )
         return df
 
     def transform_lead_utm_group(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -401,10 +326,31 @@ class ManualFeatureExtractor:
         df[col] = df[col].fillna("unknown")
         return df
 
+
+
+
+
     def transform_lead_utm_referrer_site(self, df: pd.DataFrame) -> pd.DataFrame:
         col = "lead_utm_referrer"
         if not self._column_exists(df, col):
             return df
+
+        def extract_category(value):
+            categories = ["varikoz", "otek", "sustav", "sleep", "davlenie"]
+            # Обработка пропусков и нестроковых значений
+            if not isinstance(value, str) or not value:
+                return "unknown"
+
+            # Приводим к нижнему регистру для корректного поиска
+            value_lower = value.lower()
+
+            # Ищем первую подходящую категорию в списке
+            for category in categories:
+                if category in value_lower:
+                    return category
+
+            # Если ни одна категория не найдена — возвращаем 'other'
+            return "other"
 
         def get_site_category(url: object) -> str:
             if pd.isna(url) or not url:
@@ -417,6 +363,16 @@ class ManualFeatureExtractor:
             return "other"
 
         df["lead_utm_referrer_site"] = df[col].apply(get_site_category)
+
+        df["lead_utm_referrer"] = df[
+            "lead_utm_referrer"].apply(
+            lambda x: x.rsplit("/", 1)[1] if isinstance(x,
+                                                        str) and x else x
+        )
+
+        df["lead_utm_referrer"] = df[
+            "lead_utm_referrer"].apply(extract_category)
+
         return df
 
     def transform_lead_tags(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -438,72 +394,36 @@ class ManualFeatureExtractor:
         df[col] = df[col].apply(categorize_tags)
         return df
 
-    def transform_utm_content_chain(self, df: pd.DataFrame) -> pd.DataFrame:
+
+    def transform_utm_content_chain(self,
+                                    df: pd.DataFrame) -> pd.DataFrame:
+
+        return process_lead_utm.add_lead_utm_device_type(df)
+
+    def transform_utm_content_chain2(self,
+                                    df: pd.DataFrame) -> pd.DataFrame:
         source_col = "lead_utm_content"
-        if not self._column_exists(df, source_col):
-            return df
-
         utm_parsed = self._split_utm_content(df[source_col])
+        df = pd.concat([df, utm_parsed], axis=1)
 
-        analytics_cols = [f"utm_{i}" for i in range(1, 11)]
-
-        tmp = utm_parsed.copy()
-        for col in analytics_cols:
-            res = self._get_string_values(tmp, col)
-            if col in tmp.columns:
-                tmp[col] = tmp[col].astype("string")
-                tmp.loc[tmp[col].isin(res), col] = "-1"
+        res = self.get_string_values(df, "utm_1")
 
         for col in ["utm_1", "utm_2", "utm_3", "utm_8", "utm_9"]:
-            if col in tmp.columns:
-                tmp[col] = pd.to_numeric(tmp[col], errors="coerce").fillna(
-                    -1).astype(int)
+            df[col] = df[col].astype("string")
+            df.loc[df[col].isin(res), col] = "-1"
 
-        rename_map = {
+        for col in ["utm_1", "utm_2", "utm_3", "utm_8", "utm_9"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(
+                -1).astype("int")
+
+        df = df.rename(columns={
             "utm_1": "lead_utm_id_1",
-            "utm_2": "lead_utm_id_2",
             "utm_3": "lead_utm_id_3",
-            "utm_4": "lead_utm_campaign_type",
-            "utm_5": "lead_utm_device_type",
-            "utm_6": "lead_utm_site",
-            "utm_7": "lead_utm_position_type",
-            "utm_8": "lead_utm_position",
-            "utm_9": "lead_utm_reatrgeting_id",
-            "utm_10": "lead_utm_region_name",
-        }
-        tmp = tmp.rename(columns=rename_map)
 
-        for col in tmp.select_dtypes(include=["object", "string"]).columns:
-            tmp[col] = np.where(tmp[col].isna(), "unknown", tmp[col])
-
-        if "lead_utm_device_type" in tmp.columns:
-            tmp.loc[
-                tmp["lead_utm_device_type"].isin(["undefined", ""]),
-                "lead_utm_device_type",
-            ] = "unknown"
-
-        for col in [
-            "lead_utm_id_1",
-            "lead_utm_id_2",
-            "lead_utm_id_3",
-            "lead_utm_device_type",
-            "lead_utm_reatrgeting_id",
-        ]:
-            if col in tmp.columns:
-                df[col] = tmp[col].values
+        })
 
         return df
 
-    def transform_lead_manager_category(self, df: pd.DataFrame) -> pd.DataFrame:
-        col = "lead_responsible_user_id"
-        if not self._column_exists(df, col):
-            return df
-
-        top10_ids = df[col].value_counts().index[:10]
-        df["lead_manager_category"] = "rare"
-        df.loc[df[col].isin(top10_ids[:5]), "lead_manager_category"] = "top"
-        df.loc[df[col].isin(top10_ids[5:10]), "lead_manager_category"] = "middle"
-        return df
 
     def transform_lead_creation_date_features(self, df: pd.DataFrame) -> pd.DataFrame:
         source_candidates = ["lead_Дата создания сделки", "lead_created_at"]
@@ -516,35 +436,16 @@ class ManualFeatureExtractor:
         else:
             dt = self._safe_to_datetime(df[source_col], unit="s")
 
-        df["lead_creation_date_month"] = dt.dt.month.astype("Float64").fillna(-1)
-        df["lead_creation_date_quarter"] = dt.dt.quarter.astype("Float64").fillna(-1)
+        df["lead_creation_date_month"] = dt.dt.month.astype(
+            "Int64").fillna(-1)
+        df["lead_creation_date_quarter"] = dt.dt.quarter.astype(
+            "Int64").fillna(-1)
 
         day = dt.dt.day
         df["lead_creation_date_sin"] = np.sin(2 * np.pi * day / 30)
         df["lead_creation_date_sin"] = df["lead_creation_date_sin"].fillna(-1)
         return df
 
-    def transform_sale_date_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        source_col = None
-        if "sale_date" in df.columns:
-            source_col = "sale_date"
-            dt = self._safe_to_datetime(df[source_col])
-        elif "sale_ts" in df.columns:
-            source_col = "sale_ts"
-            dt = self._safe_to_datetime(df[source_col], unit="s")
-        else:
-            return df
-
-        df["sale_date_quarter"] = dt.dt.quarter.astype("Float64").fillna(-1)
-        df["sale_date_dayofweek"] = dt.dt.dayofweek.astype("Float64").fillna(-1)
-        df["sale_month"] = dt.dt.month.astype("Float64").fillna(-1)
-        df["sale_hour"] = dt.dt.hour.astype("Float64").fillna(-1)
-        return df
-
-    def transform_source_feature(self, df: pd.DataFrame) -> pd.DataFrame:
-        if self._column_exists(df, "lead_Источник"):
-            df["lead_source"] = df["lead_Источник"].fillna("unknown")
-        return df
 
     def transform_timedelta_and_created_features(self, df: pd.DataFrame) -> pd.DataFrame:
         if not {"sale_ts", "lead_created_at"}.issubset(df.columns):
@@ -556,7 +457,8 @@ class ManualFeatureExtractor:
         df["timedelta_between_sale_and_creation"] = sale_ts_num - lead_created_num
 
         df["lead_created_ts"] = self._safe_to_datetime(df["lead_created_at"], unit="s")
-        df["lead_created_dayofweek"] = df["lead_created_ts"].dt.dayofweek.astype("Float64").fillna(-1)
+        df["lead_created_dayofweek"] = df[
+            "lead_created_ts"].dt.dayofweek.astype("int8").fillna(-1)
         return df
 
     def transform_length_feature(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -567,44 +469,6 @@ class ManualFeatureExtractor:
         df["lead_length"] = df[source_col].fillna(-1)
         return df
 
-    def transform_order_composition_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        source_col = "lead_Состав заказа"
-        if not self._column_exists(df, source_col):
-            return df
-
-        text = df[source_col].fillna("").astype(str)
-
-        def extract_total_cost(t: str) -> int:
-            if not t:
-                return 0
-            prices = re.findall(r"Розничная цена:\s*(\d+)", t, re.IGNORECASE)
-            return sum(int(p) for p in prices)
-
-        brace_keywords = [
-            "повязка", "ободок", "напульсник", "наколенник", "налокотник",
-            "пояс", "поясничный", "бандаж", "жилет", "шейный",
-        ]
-        pattern = "|".join(sorted(set(brace_keywords)))
-
-        df["lead_total_cost_from_composition"] = text.apply(extract_total_cost)
-        df["lead_has_brace"] = text.str.contains(pattern, case=False, na=False).astype(int)
-        return df
-
-    def transform_discount_category(self, df: pd.DataFrame) -> pd.DataFrame:
-        source_col = "lead_Скидка"
-        if not self._column_exists(df, source_col):
-            return df
-
-        discount = pd.to_numeric(df[source_col], errors="coerce")
-        df["lead_discount_category"] = pd.cut(
-            discount,
-            bins=[-1, 0, 10, 20, 40],
-            labels=["no_discount", "small", "medium", "large"],
-            include_lowest=True,
-        ).astype(str)
-
-        df.loc[discount.isna(), "lead_discount_category"] = "unknown"
-        return df
 
     def transform_cluster(self, df: pd.DataFrame) -> pd.DataFrame:
         df["lead_tags_str"] = df["lead_tags"].apply(

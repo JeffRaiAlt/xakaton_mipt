@@ -20,8 +20,21 @@ def add_lead_utm_device_type(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df.copy()
     df["lead_utm_device_type"] = utm_parsed["utm_5"]
+    df["lead_utm_id_1"] = utm_parsed["utm_1"]
+    df["lead_utm_id_3"] = utm_parsed["utm_3"]
 
     df["lead_utm_device_type"] = df["lead_utm_device_type"].fillna("unknown")
+    df["lead_utm_id_1"] = (
+        pd.to_numeric(df["lead_utm_id_1"], errors="coerce")
+        .fillna(-1)
+        .astype("int")
+    )
+
+    df["lead_utm_id_3"] = (
+        pd.to_numeric(df["lead_utm_id_3"], errors="coerce")
+        .fillna(-1)
+        .astype("int64")
+    )
 
     df.loc[
         df["lead_utm_device_type"].isin(["undefined", ""]),
