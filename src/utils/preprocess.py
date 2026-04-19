@@ -3,7 +3,7 @@ import pandas as pd
 import re
 from catboost import CatBoostClassifier, Pool, EFstrType
 from sklearn.metrics import roc_auc_score, log_loss, average_precision_score
-from src.utils.contact_code_utils import (
+from utils.contact_code_utils import (
     exctract_code_pvz,
     expand_cities_by_comma,
     get_region,

@@ -1,9 +1,9 @@
 import argparse
 from pathlib import Path
 import pandas as pd
-from sklearn.metrics import average_precision_score
 import joblib
 import feature_audit.selector.manual_feature_extraction as mfe
+from utils.preprocess import evaluate
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # project/
 MODEL_PATH = BASE_DIR / "model/model.pkl"
@@ -65,9 +65,7 @@ y = df[TARGET]
 
 probs_refuse = model.predict_proba(X)[:, 1]
 
-y_refuse = (y == 0).astype(int)
-pr_auc_refuse = average_precision_score(y_refuse, probs_refuse)
-print("PR-AUC_refuse:", pr_auc_refuse)
+print(evaluate(model, X, y))
 
 # =========================
 # Save output

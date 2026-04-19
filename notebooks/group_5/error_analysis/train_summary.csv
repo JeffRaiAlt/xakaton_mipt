@@ -1,0 +1,7 @@
+metric,value
+threshold,0.15000000000000002
+total_rows,14372.0
+tp_0_count,1944.0
+fn_0_count,500.0
+fp_0_count,6634.0
+tn_0_count,5294.0

@@ -1,105 +1,138 @@
+# 📦 Проект: обработка данных и оценка моделей (CatBoost)
 
+## 📖 Описание
 
-## Структура проекта
+Проект реализует полный цикл работы с данными:
+- предобработка и трансформация признаков
+- подбор различных наборов фичей
+- быстрая проверка качества моделей
+- экспериментально анализ ошибок (включая кластеризацию FP)
 
 
 ---
 
-#### data/
+## 🗂 Структура проекта
 
+### `assembled_outputs/`
+Каталог для хранения датасетов, собранных из данных участников хакатона  
+(использовался на этапе анализа данных).
+
+---
+
+### `data/`
 Данные и описание признаков.
 
-- MIPT_hackathon_dataset_справочник_полей.md — описание полей датасета  
-- feature_groups/ — разбиение признаков на группы  
-  - features_group_1.txt … features_group_5.txt — списки признаков по группам  
+- `MIPT_hackathon_dataset_справочник_полей.md` — описание полей  
+- `feature_groups/` — разбиение признаков на группы  
+  - `features_group_1.txt` … `features_group_5.txt`  
+- `raw/` — исходные данные от организаторов  
+- `cleaned_dataset/` — подготовленные данные для обучения  
 
 ---
 
-#### notebooks/
+### `model/`
+- `model.pkl` — сериализованная модель CatBoost для инференса  
 
-Рабочая зона для анализа и работы.
- 
-notebooks/group_2/ - model_processing_2.ipynb - основная рабочая модель
+---
 
+### `notebooks/`
+Рабочая зона для анализа.
 
-#### src/
+- `group_2/model_processing_2.ipynb` — основная модель  
 
+---
+
+### `scripts/`
+Скрипты для запуска инференса и расчета метрик.
+
+---
+
+### `src/`
 Основной код проекта.
 
-- run_pipeline.py — точка запуска пайплайна (пока только предварительная 
-  очистка интегрирована)  
-- report.py — формирование итоговых отчётов 
-- run_selector.py - позволяет на основании исходного предобработанного
-dataset-а final_dataset_from_notebooks.csv создавать различные 
-dataset-ы с разными наборами признаков пользуясь различными стратегиями.
-Нужно для поиска самых важных признаков, удаления шума уменьшения числа
-признаков без уменьшения предсказательной способности. 
-Может служить ядром для развития полностью автоматизированной 
-предобработки признаков с применением LLM.
-- run_quick_model_check.py - быстрая проверка метрик сгенерированного 
-dataset-а. Можно подключать разные модели для проверки.  
-#todo скомбинировать работу по созданию dataset-ов и проверке качества 
-полученных предсказаний, для поиска оптимума в рамках выбранных 
-стратегий.
-- скрипт data_preprocessing.py - создает новый датасет, на основании 
-исходного датасета. Для этого использует преобразования
-выбранных признаков. Этот список можно произвольно расширять, для этого
-необходимо:
-  - добавить новый метод transform_"New_Feature" в класс 
-feature_audit.selector.manual_feature_extraction.ManualFeatureExtractor,
-  - в этом же классе, добавить вызов нового метода в методе transform(),
-  - и добавить название нового (признака или признаков) в фильтр 
-    final_features_list в скрипте data_preprocessing.py
-  
-  Новый датасет появится в каталоге
-  PROJECT_ROOT\data\cleaned_dataset\final_dataset.csv
----
+#### Основные скрипты
 
-#### src/assembler/
+- `run_pipeline.py` — точка входа для предварительного анализа данных  
+- `report.py` — генерация отчетов (использовался на ранних этапах)
 
-Сборка финального датасета.
+- `run_dataset_generator.py`  
+  Генерация датасетов с различными наборами признаков и стратегиями:
+  - отбор значимых признаков  
+  - удаление шумовых фичей  
+  - снижение размерности без потери качества  
 
-- assemble_dataset_notebook.py — сборка датасета  
-- io.py — загрузка/сохранение данных  
+- `run_quick_model_check.py`  
+  Быстрая проверка качества датасета:
+  - поддержка разных моделей  
+  - анализ ошибок (FP)  
+  - кластеризация ошибок  
+
+  Пример:
+  notebooks/group5/error_analysis/test_fp0_cluster_summary.csv
+
+- `data_preprocessing.py`  
+  Формирует финальный датасет из исходного  
+
+  Результат:
+  PROJECT_ROOT/data/cleaned_dataset/final_dataset.csv
+
+- `score.py`
+   Скрипт для загрузки модели из model.pkl и выполнения инференса на 
+  новых данных. 
+
 
 ---
 
-#### src/feature_audit/
-
-Анализ и очистка признаков.
-
-- feature_cleaning_pipeline_base.py — базовый пайплайн очистки  
-- logger.py — логирование этапов  
-- utils.py — вспомогательные функции  
+### `src/assembler/`
+Сборка датасета (ранний этап):
+- assemble_dataset_notebook.py  
+- io.py  
 
 ---
 
-#### src/feature_audit/analyser/
+### `src/feature_audit/`
 
-Анализаторы признаков.
+Анализ и обработка признаков.
 
-- base.py — базовый класс анализатора  
-- cardinality_analyser.py — высокая кардинальность  
-- categorical_target_correlation_analyser.py — связь категорий с target  
-- date_analyser.py — анализ дат  
-- date_candidates_analyser.py — кандидаты в даты  
-- dominant_analyser.py — доминирующие значения  
-- duplicates_analyser.py — дубликаты  
-- empty_features_analyser.py — пустые признаки  
-- feature_analyser_5_structured.py — структурный анализ  
-- manual_dropper_analyser.py — ручное удаление  
-- numeric_feature_correlation_analyser.py — корреляции числовых признаков  
-- numeric_target_correlation_analyser.py — корреляция с target  
-- order_analyser.py — временной порядок  
-- tmp_feature_analyser_5.py — экспериментальный анализатор  
+- feature_cleaning_pipeline_base.py — базовый пайплайн  
+
+#### analyser/
+Анализ сырого датасета  
+
+#### selector/
+Основной рабочий модуль:
+
+- manual_feature_extraction.py — трансформация признаков  
+- model_cat_boost.py — модель + метрики + FP-анализ  
 
 ---
 
-#### src/feature_audit/selector/
+## 🚀 Использование
 
-Отбор признаков на основе моделей и метрик.
+Перейти в:
+```
+prj/scripts
+```
 
-- models/ — реализации моделей для отбора (CatBoost, RF, LogReg)  
-- utils/ — вспомогательные функции для отбора  
-- selector_pipeline.py — основной пайплайн отбора признаков  
+Запуск:
 
+Windows:
+```
+run_score.bat <input_path> <output_path>
+```
+
+Linux/macOS:
+```
+run_score.sh <input_path> <output_path>
+```
+
+Пример:
+```
+run_score.bat C:\New\dataset_new.csv C:\REPORT\out.csv
+```
+
+Параметры:
+- input_path — входной датасет  
+- output_path — отчет  
+
+---
