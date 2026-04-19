@@ -111,7 +111,7 @@
 
 Перейти в:
 ```
-prj/scripts
+PROJECT_ROOT/scripts
 ```
 
 Запуск:
