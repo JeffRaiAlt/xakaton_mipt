@@ -51,6 +51,7 @@ drop_cols = (
         "lead_utm_reatrgeting_id",
         "sale_date",
         "lead_Квалификация лида"
+        "lead_created_ts"
     )
 
 if __name__ == "__main__":

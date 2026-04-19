@@ -37,9 +37,12 @@ def preprocess_initial_dataset(df: pd.DataFrame) -> pd.DataFrame:
             "lead_pipeline_id",
         ]
     )
-    df[["sale_ts", "lead_created_ts"]] = df[
-        ["sale_ts", "lead_created_ts"]
-    ].astype("datetime64[ns]")
+    #df[["sale_ts", "lead_created_ts"]] = df[
+    #    ["sale_ts", "lead_created_ts"]
+    #].astype("datetime64[ns]")
+    df[["sale_ts"]] = df[
+        ["sale_ts"]
+     ].astype("datetime64[ns]")
     return df
 
 
@@ -131,7 +134,7 @@ def train_catboost_model(X_train, y_train, X_val, y_val, X_test, y_test):
     )
 
     # обучение
-    model.fit(X_train, y_train_refuse, eval_set=(X_val, y_val_refuse))
+    model.fit(X_train, y_train_refuse, eval_set=(X_val, y_val_refuse), use_best_model=True)
 
     # метрики
     metrics = evaluate(model, X_test, y_test)

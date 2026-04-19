@@ -27,8 +27,6 @@ def save_result(result: dict, base_path: str):
 def main() -> None:
     result = do_work_cat(
         data_path=str(PROJECT_ROOT / "data" / "cleaned_dataset" / "final_dataset.csv"),
-        #data_path=str(PROJECT_ROOT / "src" / "tmp" / "out" /
-        # "experiment.csv"),
         target="buyout_flag",
         time_col="sale_ts",
         test_size=0.2,

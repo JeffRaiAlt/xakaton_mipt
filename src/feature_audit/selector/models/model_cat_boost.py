@@ -135,7 +135,7 @@ class QuickCatBoostModelCheck:
 
     def _load_data(self) -> pd.DataFrame:
         df = pd.read_csv(self.config.data_path, low_memory=False)
-        #df = df.drop(columns=self.drop_cols)
+        df = df.drop(columns="lead_created_ts")
         df = df[df[self.config.target].notna()].copy()
         df[self.config.target] = df[self.config.target].astype(int)
         df[self.config.time_col] = pd.to_datetime(df[self.config.time_col], errors="coerce")
